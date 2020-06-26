@@ -12,11 +12,7 @@ def make_callback_data(filter_key: Union[str, int],
         "v": callback_value
     }
 
-    dump: str = jsonlib.dumps(data)
-
-    for key in data.keys():
-        dump = dump.replace(f'"{key}": ', f'"{key}":', 1)
-    data = dump.replace(', "v"', ',"v"')
+    data = jsonlib.dumps(data, separators=(",", ":"), sort_keys=True)
 
     if isinstance(callback_value, list):
         compacted_value = f"[{','.join(str(i) for i in callback_value)}]"
