@@ -14,8 +14,8 @@ $ pip install git+https://github.com/Abstract-X/aiogram-callback-factory.git
 - `CallbackDataFilter` to select a specific CallbackQuery.
 - `CallbackFactoryMiddleware` to get a clean callback_data value (no filter prefix).
 ---
-`make_callback_data`
-*Note: callback_value supports strings, numbers, and lists.*
+`make_callback_data`  
+**Note:** _callback_value supports strings, numbers, and lists._
 ``` python3
 >>> from aiogram_callback_factory import make_callback_data
 >>>
@@ -56,7 +56,7 @@ dispatcher.middleware.setup(CallbackFactoryMiddleware())
 async def handle_callback_query(query):
     print(query.data)  # it will output: 'my_value_for_testing'
 ```
-*Note: CallbackFactoryFilter supports `enum.Enum`:*
+**Note:** _CallbackFactoryFilter supports `enum.Enum`:_
 ``` python3
 import enum
 from aiogram_callback_factory import make_callback_data
