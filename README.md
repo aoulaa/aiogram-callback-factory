@@ -76,8 +76,8 @@ test_button = InlineKeyboardButton(
 keyboard.row(test_button)
 
 @dispatcher.message_handler()
-async def handle_message(update: Message):
-    await bot.send_message(chat_id=update.from_user.id, text="Testing?", reply_markup=keyboard)
+async def handle_message(message):
+    await bot.send_message(chat_id=message.from_user.id, text="Testing?", reply_markup=keyboard)
 
 @dispatcher.callback_query_handler(callback_data=CallbackFilterKey.TEST)  # enum key
 async def handle_callback_query(query):
