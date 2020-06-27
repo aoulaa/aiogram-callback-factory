@@ -15,12 +15,17 @@ $ pip install git+https://github.com/Abstract-X/aiogram-callback-factory.git
 - `CallbackFactoryMiddleware` to get a clean callback_data value (no filter prefix).
 ---
 `make_callback_data`
+*Note: callback_value supports strings, numbers, and lists.*
 ``` python3
 >>> from aiogram_callback_factory import make_callback_data
 >>>
->>> callback_data = make_callback_data(filter_key="test_key", callback_value="test_value")  # callback_value supports strings, numbers, and lists
+>>> callback_data = make_callback_data(filter_key="test_key", callback_value="test_value")
 >>> callback_data
 '{"k":"test_key","v":"test_value"}'
+>>>
+>>> callback_data = make_callback_data(filter_key="test_key", callback_value=[111, 222, 333])
+>>> callback_data
+'{"k":"test_key","v":[111,222,333]}'
 ```
 ---
 `parse_callback_data`
@@ -32,33 +37,54 @@ $ pip install git+https://github.com/Abstract-X/aiogram-callback-factory.git
 'test_key'
 >>> callback_value
 'test_value'
+>>>
+>>> # list
+>>> _, callback_value = parse_callback_data('{"k":"test_key","v":[111,222,333]}')
+>>> callback_value
+[111, 222, 333]
 ```
 ---
 `CallbackDataFilter` & `CallbackFactoryMiddleware`
 ``` python3
 from aiogram_callback_factory import CallbackDataFilter, CallbackFactoryMiddleware
 
+# setup filter and middleware
+dispatcher.filters_factory.bind(CallbackDataFilter, event_handlers=[dispatcher.callback_query_handlers])
+dispatcher.middleware.setup(CallbackFactoryMiddleware())
+
 @dispatcher.callback_query_handler(callback_data="my_filter_key_for_testing")
 async def handle_callback_query(query):
     print(query.data)  # it will output: 'my_value_for_testing'
+```
+*Note: CallbackFactoryFilter supports `enum.Enum`:*
+``` python3
+import enum
+from aiogram_callback_factory import make_callback_data
 
-dispatcher.filters_factory.bind(CallbackDataFilter, event_handlers=[dispatcher.callback_query_handlers])
-dispatcher.middleware.setup(CallbackFactoryMiddleware())
+class CallbackFilterKey(enum.IntEnum):
+    TEST = enum.auto()
+
+# make inline keyboard
+keyboard = InlineKeyboardMarkup()
+test_button = InlineKeyboardButton(
+    text="🔎 Test it!",
+    callback_data=make_callback_data(
+        filter_key=CallbackFilterKey.TEST,  # enum key
+        callback_value="my_value_for_testing"
+    )
+)
+keyboard.row(test_button)
+
+@dispatcher.message_handler()
+async def handle_message(update: Message):
+    await bot.send_message(chat_id=update.from_user.id, text="Testing?", reply_markup=keyboard)
+
+@dispatcher.callback_query_handler(callback_data=CallbackFilterKey.TEST)  # enum key
+async def handle_callback_query(query):
+    print(query.data)  # it will output: 'my_value_for_testing'
+
 ```
 
 ## Tips
-1. For filters values, it is better to use short enums.  
-For example:
-``` python3
-import enum
-
-class CallbackKey(enum.Enum):
-      SOME_TEST_KEY = enum.auto()  # CallbackKey.SOME_TEST_KEY.value == 1
-      ANOTHER_TEST_KEY = enum.auto()  # CallbackKey.ANOTHER_TEST_KEY.value == 2
-
-# this handler will catch '{"k":1,"v":"some value"}'
-@dispatcher.callback_query_handler(callback_data=CallbackKey.SOME_TEST_KEY.value)
-async def handle_callback_query(query):
-    ...
-```
+1. For filters values, it is better to use short enums.
 2. Use only ***latin*** characters (as well as numbers, signs, etc.) to create callback_data.
