@@ -1,14 +1,16 @@
 from typing import Union, Tuple
 import json as jsonlib
+from enum import Enum
+
 
 from .exceptions import CallbackDataIsTooLongError
 
 
-def make_callback_data(filter_key: Union[str, int],
+def make_callback_data(filter_key: Union[str, int, Enum],
                        callback_value: Union[str, int, list, None] = None) -> str:
 
     data = {
-        "k": filter_key,
+        "k": filter_key.value if isinstance(filter_key, Enum) else filter_key,
         "v": callback_value
     }
 
