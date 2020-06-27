@@ -2,7 +2,6 @@ from typing import Union, Tuple
 import json as jsonlib
 from enum import Enum
 
-
 from .exceptions import CallbackDataIsTooLongError
 
 
